@@ -6,7 +6,7 @@ Calculator V2 is a terminal-based Python calculator created as an educational pr
 
 - Addition, subtraction, multiplication, and division
 - Negative and decimal number support
-- A menu for calculating, viewing session history, and exiting
+- A menu for calculating, viewing or clearing session history, and exiting
 - Numbered history that preserves calculation order
 - Validation for invalid numeric input, invalid operators, and division by zero
 - Rejection of non-finite numeric values: `nan`, `inf`, and `-inf`
@@ -35,12 +35,16 @@ The program displays this menu:
 1. Calculate
 2. Show history
 3. Exit
+4. Clear history
 Choose an option:
 ```
 
 - Choose `1` to enter a first number, an operator, and a second number.
 - Choose `2` to display successful calculations from the current session.
 - Choose `3` to print `Goodbye!` and exit.
+- Choose `4` to clear the current session's history immediately, without confirmation. The program prints `History cleared.` even when history is already empty, then returns to the menu.
+
+After clearing, viewing history prints `No calculations yet.` New calculations are stored normally, with history numbering starting again at `1`.
 
 Only successful calculations are added to history. Invalid numbers, invalid operators, division by zero, and non-finite values are rejected and are not recorded.
 
@@ -79,6 +83,7 @@ The tests cover:
 - Invalid numeric input, non-finite values, invalid operators, and division by zero
 - Menu choices, repeated calculations, graceful exits, and invalid menu input
 - Empty history, history ordering, successful-only history records, and independent sessions
+- Clearing populated or empty history, repeated clearing, whitespace around option `4`, new calculations after clearing, and interrupted input after clearing
 - `EOFError` and `KeyboardInterrupt` during menu and calculation input
 - Direct script execution and importing the module without starting interaction
 

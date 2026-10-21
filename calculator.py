@@ -53,6 +53,7 @@ def main():
         print("1. Calculate")
         print("2. Show history")
         print("3. Exit")
+        print("4. Clear history")
         try:
             choice = input("Choose an option: ").strip()
         except (EOFError, KeyboardInterrupt):
@@ -72,8 +73,11 @@ def main():
         elif choice == "3":
             print("Goodbye!")
             break
+        elif choice == "4":
+            history.clear()
+            print("History cleared.")
         else:
-            print("Error: Invalid option. Choose 1, 2, or 3.")
+            print("Error: Invalid option. Choose 1, 2, 3, or 4.")
 
 
 if __name__ == "__main__":

@@ -84,38 +84,38 @@ class CalculatorTests(unittest.TestCase):
         with patch("calculator.perform_calculation") as calculation:
             self.check_session(
                 ["1", "3"],
-                "1. Calculate\n2. Show history\n3. Exit\n1. Calculate\n2. Show history\n3. Exit\nGoodbye!\n",
+                "1. Calculate\n2. Show history\n3. Exit\n4. Clear history\n1. Calculate\n2. Show history\n3. Exit\n4. Clear history\nGoodbye!\n",
             )
         calculation.assert_called_once_with()
 
     def test_exit_immediately(self):
         with patch("calculator.perform_calculation") as calculation:
-            self.check_session(["3"], "1. Calculate\n2. Show history\n3. Exit\nGoodbye!\n")
+            self.check_session(["3"], "1. Calculate\n2. Show history\n3. Exit\n4. Clear history\nGoodbye!\n")
         calculation.assert_not_called()
 
     def test_repeated_calculations(self):
         self.check_session(
             ["1", "2", "+", "3", "1", "9", "/", "2", "3"],
-            "1. Calculate\n2. Show history\n3. Exit\nResult: 5.0\n"
-            "1. Calculate\n2. Show history\n3. Exit\nResult: 4.5\n"
-            "1. Calculate\n2. Show history\n3. Exit\nGoodbye!\n",
+            "1. Calculate\n2. Show history\n3. Exit\n4. Clear history\nResult: 5.0\n"
+            "1. Calculate\n2. Show history\n3. Exit\n4. Clear history\nResult: 4.5\n"
+            "1. Calculate\n2. Show history\n3. Exit\n4. Clear history\nGoodbye!\n",
         )
 
     def test_invalid_menu_choices(self):
-        for choice in ("", " ", "4", "abc", "exit"):
+        for choice in ("", " ", "5", "abc", "exit"):
             with self.subTest(choice=choice):
                 self.check_session(
                     [choice, "3"],
-                    "1. Calculate\n2. Show history\n3. Exit\n"
-                    "Error: Invalid option. Choose 1, 2, or 3.\n"
-                    "1. Calculate\n2. Show history\n3. Exit\nGoodbye!\n",
+                    "1. Calculate\n2. Show history\n3. Exit\n4. Clear history\n"
+                    "Error: Invalid option. Choose 1, 2, 3, or 4.\n"
+                    "1. Calculate\n2. Show history\n3. Exit\n4. Clear history\nGoodbye!\n",
                 )
 
     def test_menu_whitespace(self):
         self.check_session(
             [" 1 ", "2", "+", "3", " 3 "],
-            "1. Calculate\n2. Show history\n3. Exit\nResult: 5.0\n"
-            "1. Calculate\n2. Show history\n3. Exit\nGoodbye!\n",
+            "1. Calculate\n2. Show history\n3. Exit\n4. Clear history\nResult: 5.0\n"
+            "1. Calculate\n2. Show history\n3. Exit\n4. Clear history\nGoodbye!\n",
         )
 
     def test_calculation_errors_return_to_menu(self):
@@ -129,9 +129,9 @@ class CalculatorTests(unittest.TestCase):
             with self.subTest(inputs=inputs):
                 self.check_session(
                     ["1"] + inputs + ["1", "2", "+", "3", "3"],
-                    "1. Calculate\n2. Show history\n3. Exit\n" + error + "\n"
-                    "1. Calculate\n2. Show history\n3. Exit\nResult: 5.0\n"
-                    "1. Calculate\n2. Show history\n3. Exit\nGoodbye!\n",
+                    "1. Calculate\n2. Show history\n3. Exit\n4. Clear history\n" + error + "\n"
+                    "1. Calculate\n2. Show history\n3. Exit\n4. Clear history\nResult: 5.0\n"
+                    "1. Calculate\n2. Show history\n3. Exit\n4. Clear history\nGoodbye!\n",
                 )
 
     def test_script_starts_menu_and_exits(self):
@@ -139,7 +139,7 @@ class CalculatorTests(unittest.TestCase):
             with redirect_stdout(io.StringIO()) as output:
                 runpy.run_path(calculator.__file__, run_name="__main__")
         mock_input.assert_called_once_with("Choose an option: ")
-        self.assertEqual(output.getvalue(), "1. Calculate\n2. Show history\n3. Exit\nGoodbye!\n")
+        self.assertEqual(output.getvalue(), "1. Calculate\n2. Show history\n3. Exit\n4. Clear history\nGoodbye!\n")
 
     def test_import_does_not_start_interaction(self):
         spec = importlib.util.spec_from_file_location(
@@ -183,13 +183,13 @@ class CalculatorTests(unittest.TestCase):
         self.assertEqual(history, original)
 
     def test_empty_history_returns_to_menu(self):
-        menu = "1. Calculate\n2. Show history\n3. Exit\n"
+        menu = "1. Calculate\n2. Show history\n3. Exit\n4. Clear history\n"
         self.check_session(
             ["2", "3"], menu + "No calculations yet.\n" + menu + "Goodbye!\n"
         )
 
     def test_session_history_records_successes_once(self):
-        menu = "1. Calculate\n2. Show history\n3. Exit\n"
+        menu = "1. Calculate\n2. Show history\n3. Exit\n4. Clear history\n"
         records = "1. 2.0 + 3.0 = 5.0\n2. 9.0 / 2.0 = 4.5\n"
         self.check_session(
             ["1", "2", "+", "3", "1", "9", "/", "2", "2", "2", "3"],
@@ -198,7 +198,7 @@ class CalculatorTests(unittest.TestCase):
         )
 
     def test_failed_calculations_are_not_in_history(self):
-        menu = "1. Calculate\n2. Show history\n3. Exit\n"
+        menu = "1. Calculate\n2. Show history\n3. Exit\n4. Clear history\n"
         cases = [
             (["abc", "+", "2"], "Error: Please enter valid numbers."),
             (["2", "+", ""], "Error: Please enter valid numbers."),
@@ -215,7 +215,7 @@ class CalculatorTests(unittest.TestCase):
                 )
 
     def test_separate_sessions_have_independent_history(self):
-        menu = "1. Calculate\n2. Show history\n3. Exit\n"
+        menu = "1. Calculate\n2. Show history\n3. Exit\n4. Clear history\n"
         self.check_session(
             ["1", "2", "+", "3", "2", "3"],
             menu + "Result: 5.0\n" + menu + "1. 2.0 + 3.0 = 5.0\n"
@@ -241,12 +241,12 @@ class CalculatorTests(unittest.TestCase):
 
         self.assertEqual(
             output.getvalue(),
-            "1. Calculate\n2. Show history\n3. Exit\nGoodbye!\n",
+            "1. Calculate\n2. Show history\n3. Exit\n4. Clear history\nGoodbye!\n",
         )
         mock_input.assert_called_once_with("Choose an option: ")
 
     def test_interruptions_during_calculation_input(self):
-        menu = "1. Calculate\n2. Show history\n3. Exit\n"
+        menu = "1. Calculate\n2. Show history\n3. Exit\n4. Clear history\n"
         for exception in (EOFError, KeyboardInterrupt):
             for inputs in (
                 ["1", exception],
@@ -262,6 +262,54 @@ class CalculatorTests(unittest.TestCase):
                                 self.fail(f"{exception.__name__} was not handled")
                     self.assertEqual(output.getvalue(), menu + "Goodbye!\n")
                     self.assertEqual(mock_input.call_count, len(inputs))
+
+    def test_clear_populated_history(self):
+        menu = "1. Calculate\n2. Show history\n3. Exit\n4. Clear history\n"
+        self.check_session(
+            ["1", "2", "+", "3", "1", "9", "/", "2", "4", "2", "3"],
+            menu + "Result: 5.0\n" + menu + "Result: 4.5\n"
+            + menu + "History cleared.\n" + menu + "No calculations yet.\n"
+            + menu + "Goodbye!\n",
+        )
+
+    def test_clear_empty_history(self):
+        menu = "1. Calculate\n2. Show history\n3. Exit\n4. Clear history\n"
+        self.check_session(
+            ["4", "2", "3"],
+            menu + "History cleared.\n" + menu + "No calculations yet.\n"
+            + menu + "Goodbye!\n",
+        )
+
+    def test_clear_history_repeatedly(self):
+        menu = "1. Calculate\n2. Show history\n3. Exit\n4. Clear history\n"
+        self.check_session(
+            ["4", "4", "3"],
+            (menu + "History cleared.\n") * 2 + menu + "Goodbye!\n",
+        )
+
+    def test_calculation_after_clear_starts_new_history(self):
+        menu = "1. Calculate\n2. Show history\n3. Exit\n4. Clear history\n"
+        self.check_session(
+            ["1", "2", "+", "3", "4", "1", "9", "/", "2", "2", "3"],
+            menu + "Result: 5.0\n" + menu + "History cleared.\n"
+            + menu + "Result: 4.5\n" + menu + "1. 9.0 / 2.0 = 4.5\n"
+            + menu + "Goodbye!\n",
+        )
+
+    def test_clear_history_whitespace(self):
+        menu = "1. Calculate\n2. Show history\n3. Exit\n4. Clear history\n"
+        self.check_session(
+            [" 4 ", "3"], menu + "History cleared.\n" + menu + "Goodbye!\n"
+        )
+
+    def test_interruptions_after_clear(self):
+        menu = "1. Calculate\n2. Show history\n3. Exit\n4. Clear history\n"
+        for exception in (EOFError, KeyboardInterrupt):
+            with self.subTest(exception=exception.__name__):
+                self.check_session(
+                    ["4", exception],
+                    menu + "History cleared.\n" + menu + "Goodbye!\n",
+                )
 
 if __name__ == "__main__":
     unittest.main()
