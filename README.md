@@ -1,16 +1,35 @@
-# ماشین‌حساب V2 با Python
+# Calculator V2
 
-این برنامه در Terminal چند محاسبه را در یک جلسه انجام می‌دهد و تاریخچهٔ محاسبات موفق همان جلسه را در حافظه نگه می‌دارد. به Python 3 نیاز دارد و وابستگی خارجی ندارد.
+Calculator V2 is a terminal-based Python calculator created as an educational project for learning Python and OpenAI Codex. It supports repeated calculations in one session and keeps a history of successful calculations for that session.
 
-## اجرا
+## Features
 
-در پوشهٔ پروژه دستور زیر را اجرا کنید:
+- Addition, subtraction, multiplication, and division
+- Negative and decimal number support
+- A menu for calculating, viewing session history, and exiting
+- Numbered history that preserves calculation order
+- Validation for invalid numeric input, invalid operators, and division by zero
+- Rejection of non-finite numeric values: `nan`, `inf`, and `-inf`
+- Graceful exit with `Goodbye!` when input ends (`EOFError`) or is interrupted with `Ctrl+C` (`KeyboardInterrupt`)
+- No external dependencies
+
+## Requirements
+
+- Python 3
+
+## Installation
+
+Clone or download this repository, then open a terminal in the project directory. No packages need to be installed.
+
+## Usage
+
+Run the calculator:
 
 ```sh
 python calculator.py
 ```
 
-منوی برنامه:
+The program displays this menu:
 
 ```text
 1. Calculate
@@ -19,85 +38,69 @@ python calculator.py
 Choose an option:
 ```
 
-- گزینهٔ `1`: به‌ترتیب عدد اول، عملگر و عدد دوم را وارد کنید. نتیجه یا خطا نمایش داده می‌شود و برنامه به منو برمی‌گردد.
-- گزینهٔ `2`: تاریخچه به ترتیب ثبت و با شماره از ۱ نمایش داده می‌شود؛ نمایش آن سوابق را تغییر نمی‌دهد و به منو برمی‌گردد. تاریخچهٔ خالی پیام `No calculations yet.` دارد.
-- گزینهٔ `3`: پیام `Goodbye!` نمایش داده می‌شود و برنامه پایان می‌یابد. خروج صریح فقط از منو انجام می‌شود.
+- Choose `1` to enter a first number, an operator, and a second number.
+- Choose `2` to display successful calculations from the current session.
+- Choose `3` to print `Goodbye!` and exit.
 
-گزینهٔ نامعتبر یا خالی منو پیام `Error: Invalid option. Choose 1, 2, or 3.` دارد و منو دوباره نمایش داده می‌شود. فاصلهٔ اطراف گزینه‌ها نادیده گرفته می‌شود.
+Only successful calculations are added to history. Invalid numbers, invalid operators, division by zero, and non-finite values are rejected and are not recorded.
 
-اعداد منفی و اعشاری پشتیبانی می‌شوند؛ برای ممیز از `.` استفاده کنید. عملگرهای مجاز `+`، `-`، `*` و `/` هستند. پیام‌های برنامه انگلیسی هستند. هر محاسبهٔ موفق دقیقاً یک بار ثبت می‌شود؛ ورودی غیرعددی، عملگر نامعتبر و تقسیم بر صفر ثبت نمی‌شوند.
-
-نمونهٔ محاسبه پس از انتخاب `1` (ورودی‌های تایپ‌شده نیز نشان داده شده‌اند):
+### Example
 
 ```text
+Choose an option: 1
 Enter the first number: 9
 Enter an operator (+, -, *, /): /
 Enter the second number: 2
 Result: 4.5
-```
 
-پس از بازگشت به منو، انتخاب `2` این رکورد را نمایش می‌دهد:
-
-```text
+Choose an option: 2
 1. 9.0 / 2.0 = 4.5
 ```
 
-## تست دستی
+## Input Handling
 
-برای هر ردیف، گزینهٔ `1` را از منو انتخاب کنید. پس از نتیجه یا خطا باید دوباره منو را ببینید؛ نیازی به اجرای مجدد برنامه نیست.
+The calculator accepts finite values that Python can convert to `float`. It reports `Error: Please enter valid numbers.` for malformed numeric input and for `nan`, `inf`, and `-inf`.
 
-| عدد اول | عملگر | عدد دوم | خروجی مورد انتظار |
-|---|---|---|---|
-| `2` | `+` | `3` | `Result: 5.0` |
-| `7` | `-` | `10` | `Result: -3.0` |
-| `-4` | `*` | `2.5` | `Result: -10.0` |
-| `9` | `/` | `2` | `Result: 4.5` |
-| `5` | `/` | `0` | `Error: Cannot divide by zero.` |
-| `abc` | `+` | `2` | `Error: Please enter valid numbers.` |
-| `2` | `+` | خالی (Enter) | `Error: Please enter valid numbers.` |
-| `2` | `%` | `3` | `Error: Invalid operator. Use +, -, *, or /.` |
+It also reports clear errors for unsupported operators and division by zero. If standard input ends or the user presses `Ctrl+C` while choosing a menu option or entering a calculation, the current session ends cleanly without a traceback.
 
-سناریوهای جلسه:
+## Running Tests
 
-- در جلسهٔ تازه `2` را انتخاب کنید: `No calculations yet.` و سپس منو.
-- در یک جلسه `2 + 3` و `9 / 2` را محاسبه کنید؛ تاریخچه باید به‌ترتیب `1. 2.0 + 3.0 = 5.0` و `2. 9.0 / 2.0 = 4.5` باشد.
-- میان محاسبات موفق یک محاسبهٔ خطادار انجام دهید؛ تاریخچه نباید رکوردی برای خطا داشته باشد.
-- تاریخچه را دو بار نمایش دهید؛ شماره‌ها و محتوا نباید تغییر کنند.
-- در منو ورودی خالی یا `4` وارد کنید؛ پیام گزینهٔ نامعتبر و سپس منو نمایش داده شود.
-- با `3` خارج شوید و برنامه را دوباره اجرا کنید؛ تاریخچه باید خالی باشد.
-
-سناریوی سرتاسری بررسی‌شده در ۲۰۲۶-۱۰-۲۰: ورودی‌های زیر به‌ترتیب، هرکدام در یک خط، به برنامه داده شدند:
-
-```text
-1
-2
-+
-3
-1
-5
-/
-0
-2
-3
-```
-
-نتایج مهم به‌ترتیب `Result: 5.0`، `Error: Cannot divide by zero.`، تنها رکورد `1. 2.0 + 3.0 = 5.0` و `Goodbye!` بودند. منو پس از هر عملیات دوباره نمایش داده شد.
-
-## آزمون خودکار
-
-از پوشهٔ پروژه اجرا کنید:
+Run the complete unit-test suite from the project directory:
 
 ```sh
 python -B -m unittest -v test_calculator
 ```
 
-آزمون‌ها از کتابخانهٔ استاندارد `unittest` استفاده می‌کنند و محاسبات، اعتبارسنجی، منو، چند محاسبه، تاریخچه و import بدون تعامل را پوشش می‌دهند. گزینهٔ `-B` از ایجاد فایل بایت‌کد جلوگیری می‌کند.
+The `-B` option prevents Python from writing bytecode files during the test run.
 
-در بررسی مرحلهٔ ۴ در ۲۰۲۶-۱۰-۲۰، با Python 3.12.14 تعداد ۲۱ آزمون اجرا شد و نتیجه `OK` بود. این نتیجهٔ همان بررسی است و تضمینی برای تغییرات آینده نیست. مسیر مفسر و جزئیات بررسی در `PROJECT_CONTEXT.md` ثبت شده است.
+The tests cover:
 
-## محدودیت‌ها
+- Arithmetic operations, negative values, decimal values, and surrounding whitespace
+- Invalid numeric input, non-finite values, invalid operators, and division by zero
+- Menu choices, repeated calculations, graceful exits, and invalid menu input
+- Empty history, history ordering, successful-only history records, and independent sessions
+- `EOFError` and `KeyboardInterrupt` during menu and calculation input
+- Direct script execution and importing the module without starting interaction
 
-- ورودی‌ها به `float` تبدیل می‌شوند؛ نمایش `5.0` طبیعی است و بعضی اعشار دقیق نمایش داده نمی‌شوند، مثلاً جمع `0.1` و `0.2` ممکن است `0.30000000000000004` باشد. برنامه برای محاسبات مالی دقیق طراحی نشده است.
-- برای `nan`، `inf` و سرریز، اعتبارسنجی ویژه‌ای وجود ندارد.
-- تاریخچه فقط در حافظهٔ همان جلسه است؛ با خروج از بین می‌رود و روی دیسک ذخیره نمی‌شود. محدودیت تعداد رکورد ندارد.
-- مدیریت ویژهٔ پایان ورودی (`EOF`) یا `Ctrl+C` پیاده‌سازی نشده است.
+## Project Structure
+
+```text
+calculator.py        Application code
+test_calculator.py   Unit tests
+README.md            Project documentation
+```
+
+## Limitations
+
+- Calculations use binary floating-point values, so decimal rounding artifacts can occur. The calculator is not intended for exact financial calculations.
+- Floating-point overflow has no special handling.
+- History exists only in memory for the current session and has no record limit.
+- The project provides a terminal interface only; it has no graphical interface or persistent storage.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE). See the [LICENSE](LICENSE) file for the full text.
+
+## AI-Assisted Development
+
+OpenAI Codex was used as an assistant during the documented development workflow, including planning, implementation iterations, diff review, and test-related work. This is an educational project, and AI assistance does not guarantee correctness; the code and tests should be reviewed independently.

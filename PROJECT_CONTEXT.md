@@ -1,116 +1,103 @@
 # Project Overview
 
-This project was created to learn Python and OpenAI Codex, as documented in the root AGENTS.md.
+This is an educational project for learning Python and OpenAI Codex.
 
-# Context Verification
+# Current Implementation
 
-Verification date: 2026-10-20.
+Calculator V2 is a terminal-based calculator that supports addition, subtraction,
+multiplication, and division with `float` values.
 
-Phase 4 verification included reading AGENTS.md, calculator.py, test_calculator.py, README.md, and this document; running the full unittest suite; and running one end-to-end calculator subprocess with simulated standard input. No Git commands were run. Only README.md and PROJECT_CONTEXT.md were modified in this phase.
+- `main()` presents a menu for calculating, viewing the session history, or
+  exiting.
+- `perform_calculation()` validates the two numeric inputs, performs a valid
+  calculation, prints the result, and returns a formatted record. It returns
+  `None` when the input is invalid so failed calculations are not stored.
+- `show_history()` prints successful calculations in numbered order, or reports
+  that no calculations exist yet.
+- History is stored only in memory for the current session.
+- Importing `calculator.py` does not start the interactive program.
 
-This document must be revalidated after relevant project changes.
+## Input and interruption handling
 
-# Current Status
+Both numeric inputs must be finite. Malformed values and the special floating-
+point values `nan`, `inf`, and `-inf` are rejected with:
 
-Calculator V2 is implemented in calculator.py with addition, subtraction, multiplication, and division using float values. The menu provides `1. Calculate`, `2. Show history`, and `3. Exit`. Multiple calculations can run in one session; successful calculations and handled errors return to the menu. Option 3 prints `Goodbye!` and exits.
-
-perform_calculation() prints the existing result or error and returns a formatted record on success or None on failure. main() stores each successful record once in a local session list. show_history(history) displays numbered records in insertion order without modifying them, or `No calculations yet.` for an empty list. A new session starts with an empty history; nothing is saved to disk. Importing the module does not start interaction.
-
-# Key Decisions
-
-- The former single-calculation flow has been replaced by a session menu. Explicit exit is available from the menu only.
-- Invalid numeric input, invalid operators, and division by zero are handled in calculator.py.
-- Code should remain simple, readable, and suitable for learning, as required by AGENTS.md.
-
-# Resolved Issue
-
-The previously documented division-by-zero mismatch is resolved. calculator.py and README.md both use `Error: Cannot divide by zero.`; the automated tests and Phase 4 end-to-end run confirmed that message.
-
-# Remaining Limitations
-
-- float arithmetic can introduce decimal rounding artifacts and is not intended for exact financial calculations.
-- There is no special validation for nan, inf, or overflow.
-- History is non-persistent and has no record limit; long sessions can consume additional memory.
-- EOF and Ctrl+C have no custom handling. No graphical interface or persistent storage is implemented.
-
-# Tests Executed During Phase 4
-
-Interpreter: Python 3.12.14 at `C:\Users\user\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe`.
-
-Exact PowerShell commands for version and unit verification:
-
-```powershell
-& 'C:\Users\user\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' --version
-& 'C:\Users\user\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' -B -m unittest -v test_calculator
+```text
+Error: Please enter valid numbers.
 ```
 
-Observed unittest result: `Ran 21 tests in 0.006s`, `OK`. Tests cover arithmetic, negative/decimal values, invalid inputs and operators, division by zero, menu behavior, repeated calculations, history ordering and numbering, repeated display, exclusion of failed calculations, independent sessions, and import without interaction. Unit-test input/output is simulated.
+Invalid operators and division by zero are also reported without recording a
+calculation. If input raises `EOFError` or `KeyboardInterrupt` at the main menu
+or during a calculation, the session ends cleanly, prints `Goodbye!` once, and
+does not display a traceback.
 
-One real calculator subprocess was also executed with this in-memory verification command (no script file was created):
+# Current Test Verification
 
-```powershell
-@'
-import subprocess
-import sys
+The latest verified full-suite run was performed on 2026-10-21 with the
+project's `unittest` suite. It reported:
 
-inputs = "1\n2\n+\n3\n1\n5\n/\n0\n2\n3\n"
-run = subprocess.run(
-    [sys.executable, "-B", "calculator.py"],
-    input=inputs, text=True, capture_output=True, timeout=10,
-)
-menu = "1. Calculate\n2. Show history\n3. Exit\nChoose an option: "
-prompts = "Enter the first number: Enter an operator (+, -, *, /): Enter the second number: "
-expected = (
-    menu + prompts + "Result: 5.0\n"
-    + menu + prompts + "Error: Cannot divide by zero.\n"
-    + menu + "1. 2.0 + 3.0 = 5.0\n"
-    + menu + "Goodbye!\n"
-)
-print(run.stdout, end="")
-assert run.returncode == 0, (run.returncode, run.stderr)
-assert run.stderr == "", run.stderr
-assert run.stdout == expected, repr(run.stdout)
-print("E2E verified: exact output; only the successful calculation appears in history.")
-'@ | & 'C:\Users\user\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' -B -
+```text
+Ran 25 tests in 0.009s
+OK
 ```
 
-Observed result: exit code 0, empty stderr, and exact expected output. The session calculated 2 + 3 successfully, rejected 5 / 0, displayed only `1. 2.0 + 3.0 = 5.0` in history, and exited with `Goodbye!`. README examples and messages were compared with source, unittest expectations/results, and this actual output. Piped input is not echoed, so prompts appear adjacent in captured output; README's interactive example includes typed input for readability. No keyboard-driven manual session was performed. These results do not establish correctness for all possible inputs.
+The portable command for running the suite is:
+
+```powershell
+python -B -m unittest -v test_calculator
+```
+
+The tests cover arithmetic operations, decimal and negative values, malformed
+and non-finite numeric input, invalid operators, division by zero, menu flow,
+session history, module importing, and graceful `EOFError` and
+`KeyboardInterrupt` handling.
+
+# Current Limitations
+
+- Calculations use binary floating-point values, so results are not suitable
+  for exact financial arithmetic.
+- Floating-point overflow is not given a dedicated error message.
+- History has no persistence and is lost when the session ends.
+- The project is a terminal application and has no graphical interface.
+
+# Historical Verification Records
+
+The following record describes an earlier project state and is retained as
+development history rather than a statement about the current suite:
+
+- On 2026-10-20, a Phase 4 documentation review recorded a full `unittest`
+  result of 21 passing tests and a successful subprocess end-to-end check.
+- That record predates the finite-number and interruption-handling regression
+  tests. It must not be interpreted as the current test count or current test
+  result.
+- The same review documented that Calculator V2 had evolved from a
+  single-calculation program into a menu-based application with session
+  history, and that a division-by-zero wording discrepancy had been resolved.
 
 # Development History
 
-Verified from the current files:
+The following development history was provided by the project user and is kept
+separate from facts established solely by the current files:
 
-- calculator.py contains the calculator implementation and input validation.
-- test_calculator.py contains the automated unittest suite.
-- README.md documents usage and manual test scenarios with expected outputs.
-- AGENTS.md records project goals and working guidelines.
-- Documented test scenarios do not establish that those tests were executed.
+- The project was developed with assistance from OpenAI Codex through planning,
+  implementation, diff review, and testing exercises.
+- Earlier Calculator V2 work was organized into separately approved phases for
+  planning, implementation, review/testing, and documentation.
 
-User-provided history, not independently verified from the current files:
-
-- The project was developed with help from Codex using Plan Mode, implementation, Diff review, and testing of various scenarios.
-- The user reports Phases 1, 2, and 3 completed and reviewed. Earlier conversation reports described successful test runs; those reports are historical and are distinct from the fresh Phase 4 results above.
-- The current files alone do not establish the sequence of past development steps, the reasoning behind earlier decisions, or actual previous test results.
-
-Historical context: the earlier version performed one calculation per run, and the previous context document recorded a division-by-zero message mismatch. Those statements describe the earlier state, not current behavior. Phase 4 updated documentation and performed the verification recorded above without changing calculator.py or test_calculator.py.
+The current files verify the implemented calculator behavior and its tests, but
+they do not by themselves prove the full sequence of earlier decisions or
+executed commands.
 
 # Future Goals
 
-The following goals were provided by the user and are not recorded here as completed work:
-
-- Prepare the project for publication on GitHub.
-- Document the AI-assisted development process for a resume.
-
-# How to Continue
-
-In each new conversation, the agent should read this file and the relevant AGENTS.md instructions, including the root AGENTS.md and Practice/AGENTS.md when working inside Practice.
-
-Independently inspect the actual project files to confirm the current state before making changes. Treat this document as context that may become outdated. Keep verified file evidence separate from user-provided history, and do not infer previous decisions or successful test runs without supporting records.
+- Prepare the repository for public GitHub publication.
+- Continue learning Python and OpenAI Codex through small, reviewable changes.
 
 # Context Maintenance Rules
 
-- Recheck relevant project files before relying on recorded status.
-- Update current status, known issues, and future goals after related changes.
-- Preserve historical decisions separately from current implementation facts.
-- Record actual test results only when tests have been executed.
-- Do not mark a goal completed without supporting evidence.
+- Keep this document aligned with the current implementation and tests.
+- Distinguish verified current facts, historical verification records, and
+  user-provided development history.
+- Record a test result only after that test has actually run.
+- Do not add machine-specific paths, local runtime details, credentials, or
+  other private environment information.
