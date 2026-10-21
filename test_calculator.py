@@ -46,6 +46,18 @@ class CalculatorTests(unittest.TestCase):
             with self.subTest(inputs=inputs):
                 self.check_calculation(inputs, "Error: Please enter valid numbers.")
 
+    def test_non_finite_numbers(self):
+        for value in ("nan", "inf", "-inf"):
+            cases = (
+                ("first", [value, "+", "2"]),
+                ("second", ["2", "+", value]),
+            )
+            for position, inputs in cases:
+                with self.subTest(value=value, position=position):
+                    self.check_calculation(
+                        inputs, "Error: Please enter valid numbers."
+                    )
+
     def test_invalid_operators(self):
         for operator in ("%", "", "exit"):
             with self.subTest(operator=operator):
@@ -212,7 +224,44 @@ class CalculatorTests(unittest.TestCase):
         self.check_session(
             ["2", "3"], menu + "No calculations yet.\n" + menu + "Goodbye!\n"
         )
+    def test_eof_at_main_menu(self):
+        with patch("builtins.input", side_effect=EOFError):
+            with redirect_stdout(io.StringIO()) as output:
+                calculator.main()
 
+        self.assertEqual(
+            output.getvalue().count("Goodbye!"),
+            1
+        )
+
+    def test_keyboard_interrupt_at_main_menu(self):
+        with patch("builtins.input", side_effect=KeyboardInterrupt) as mock_input:
+            with redirect_stdout(io.StringIO()) as output:
+                calculator.main()
+
+        self.assertEqual(
+            output.getvalue(),
+            "1. Calculate\n2. Show history\n3. Exit\nGoodbye!\n",
+        )
+        mock_input.assert_called_once_with("Choose an option: ")
+
+    def test_interruptions_during_calculation_input(self):
+        menu = "1. Calculate\n2. Show history\n3. Exit\n"
+        for exception in (EOFError, KeyboardInterrupt):
+            for inputs in (
+                ["1", exception],
+                ["1", "2", exception],
+                ["1", "2", "+", exception],
+            ):
+                with self.subTest(exception=exception.__name__, inputs=inputs):
+                    with patch("builtins.input", side_effect=inputs) as mock_input:
+                        with redirect_stdout(io.StringIO()) as output:
+                            try:
+                                calculator.main()
+                            except (EOFError, KeyboardInterrupt):
+                                self.fail(f"{exception.__name__} was not handled")
+                    self.assertEqual(output.getvalue(), menu + "Goodbye!\n")
+                    self.assertEqual(mock_input.call_count, len(inputs))
 
 if __name__ == "__main__":
     unittest.main()

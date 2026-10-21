@@ -1,3 +1,6 @@
+import math
+
+
 def perform_calculation():
     first_input = input("Enter the first number: ")
     operator = input("Enter an operator (+, -, *, /): ").strip()
@@ -7,6 +10,10 @@ def perform_calculation():
         first_number = float(first_input)
         second_number = float(second_input)
     except ValueError:
+        print("Error: Please enter valid numbers.")
+        return
+
+    if not math.isfinite(first_number) or not math.isfinite(second_number):
         print("Error: Please enter valid numbers.")
         return
 
@@ -46,10 +53,18 @@ def main():
         print("1. Calculate")
         print("2. Show history")
         print("3. Exit")
-        choice = input("Choose an option: ").strip()
+        try:
+            choice = input("Choose an option: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print("Goodbye!")
+            break
 
         if choice == "1":
-            record = perform_calculation()
+            try:
+                record = perform_calculation()
+            except (EOFError, KeyboardInterrupt):
+                print("Goodbye!")
+                break
             if record is not None:
                 history.append(record)
         elif choice == "2":
